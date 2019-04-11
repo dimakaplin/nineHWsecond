@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Анатомка в медвузе</string>
+    <string name="large_text">
+        "почки\n\n"
+
+        "печень\n\n"
+
+        "желудок\n\n"
+
+        "сердце\n\n"
+
+        "мозг\n\n"
+
+        "глазки\n\n"
+
+        "селезенка\n\n"
+
+        "гортань\n\n"
+
+        "легкие\n\n"
+    </string>
+    <string-array name="woo">
+        <item>Давай режь!</item>
+        <item>Ты же будущий врач, давай еще!</item>
+        <item>Не бойся крови!</item>
+        <item>Ровнее надрезы!</item>
+    </string-array>
+</resources>
