@@ -3,10 +3,6 @@ package com.dimakaplin143.listwithclick;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-
-
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -16,7 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -25,7 +23,9 @@ public class MainActivity extends AppCompatActivity {
     private final String LARGE_TEXT = "large_text";
     List<Map<String, String>> simpleAdapterContent = new ArrayList<>();
     private SharedPreferences mySharedPref;
-    String[] wooText;
+    private String[] wooText;
+    SwipeRefreshLayout swipeLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +41,22 @@ public class MainActivity extends AppCompatActivity {
         prepareContent();
         SimpleAdapter listContentAdapter = createAdapter(simpleAdapterContent);
         list.setAdapter(listContentAdapter);
-        list.setOnItemClickListener((parent, view, position, id) -> {
 
-            count++;
+        swipeLayout = findViewById(R.id.swiperefresh);
+        swipeLayout.setOnRefreshListener(()-> {
+                prepareContent();
+                listContentAdapter.notifyDataSetChanged();
+                swipeLayout.setRefreshing(false);
+
+        });
+
+        list.setOnItemClickListener((parent, view, position, id) -> {
+            if(count == 10) {
+                count = 0;
+            } else {
+                count++;
+            }
+
             list.setBackgroundColor(colors.getColor(count,0));
             Toast.makeText(MainActivity.this, wooText[getRandom(wooText.length - 1)], Toast.LENGTH_SHORT).show();
 
@@ -63,13 +76,20 @@ public class MainActivity extends AppCompatActivity {
 
     @NonNull
     private void prepareContent() {
-        String[] largeStrings = mySharedPref.getString(LARGE_TEXT,"").split("\n\n");
-        for(String str:largeStrings) {
-            Map<String, String> elem = new HashMap<>();
-            elem.put("title", str);
-            elem.put("sub-title", Integer.toString(str.length()) + " очков гриффиндору");
-            simpleAdapterContent.add(elem);
+        String saved = mySharedPref.getString(LARGE_TEXT,"");
+        String target = getString(R.string.large_text);
+        if(!saved.equals(target)) {
+            String[] largeStrings = saved.split("\n\n");
+            simpleAdapterContent.clear();
+            for(String str:largeStrings) {
+                Map<String, String> elem = new HashMap<>();
+                elem.put("title", str);
+                elem.put("sub-title", Integer.toString(str.length()) + " очков гриффиндору");
+                simpleAdapterContent.add(elem);
+
+            }
         }
+
 
     }
 
