@@ -19,12 +19,17 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
     private int count = 0;
+    private final String REMOVE_INDEXES = "remove_indexes";
+    private final String COLOR_COUNT = "color_count";
     private final String LIST_TEXT = "strings";
     private final String LARGE_TEXT = "large_text";
-    List<Map<String, String>> simpleAdapterContent = new ArrayList<>();
+    private List<Map<String, String>> simpleAdapterContent = new ArrayList<>();
     private SharedPreferences mySharedPref;
     private String[] wooText;
-    SwipeRefreshLayout swipeLayout;
+    private SwipeRefreshLayout swipeLayout;
+    private ArrayList<Integer> removeIndexes = new ArrayList<>();
+    private ListView list;
+    TypedArray colors;
 
 
     @Override
@@ -33,18 +38,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mySharedPref = getSharedPreferences(LIST_TEXT, MODE_PRIVATE);
         saveText();
+
+
+
+
         wooText = getResources().getStringArray(R.array.woo);
         //Toolbar toolbar = findViewById(R.id.toolbar);
         // setSupportActionBar(toolbar);
-        TypedArray colors = getResources().obtainTypedArray(R.array.colors);
-        ListView list = findViewById(R.id.list);
+        colors = getResources().obtainTypedArray(R.array.colors);
+        list = findViewById(R.id.list);
         prepareContent();
         SimpleAdapter listContentAdapter = createAdapter(simpleAdapterContent);
         list.setAdapter(listContentAdapter);
 
         swipeLayout = findViewById(R.id.swiperefresh);
         swipeLayout.setOnRefreshListener(()-> {
+                removeIndexes.clear();
+
                 prepareContent();
+
                 listContentAdapter.notifyDataSetChanged();
                 swipeLayout.setRefreshing(false);
 
@@ -62,11 +74,45 @@ public class MainActivity extends AppCompatActivity {
 
             simpleAdapterContent.remove(position);
             listContentAdapter.notifyDataSetChanged();
+            removeIndexes.add(position);
 
             if(simpleAdapterContent.size() == 0){
                 Toast.makeText(MainActivity.this, "Препарируемый закончился", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        outState.putIntegerArrayList(REMOVE_INDEXES, removeIndexes);
+        outState.putInt(COLOR_COUNT, count);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+
+        super.onRestoreInstanceState(savedInstanceState);
+
+        removeIndexes = savedInstanceState.getIntegerArrayList(REMOVE_INDEXES);
+        try {
+            for(Integer i:removeIndexes) {
+                simpleAdapterContent.remove(i.intValue());
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        list = findViewById(R.id.list);
+        colors = getResources().obtainTypedArray(R.array.colors);
+        count = savedInstanceState.getInt(COLOR_COUNT);
+
+        list.setBackgroundColor(colors.getColor(count,0));
+
+
     }
 
     @NonNull
@@ -89,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-
 
     }
 
